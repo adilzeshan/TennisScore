@@ -77,13 +77,18 @@ class TennisMatch < Sinatra::Base
     redirect '/index.html'
   end
 
+  # get '/index.html' do
+  #   redirect '/'
+  # end
+
   post '/game/:pick' do
     @@games[session[:id]].play(params[:pick].to_sym)
   end
 
 
   get '/game' do
-    @@games[session[:id]].play(:backhand)
+    #"Draw"
+#    @@games[session[:id]].play(:backhand)
     "#{@@games[session[:id]].last_winner}"
   end
 

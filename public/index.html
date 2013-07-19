@@ -22,7 +22,7 @@ body {
     height:30%;
     position:absolute;
     left:20%;
-    top:50%;
+    top:40%;
     margin:-202.5px 0 0 -202.5px;
     background-color: none;
 }
@@ -111,6 +111,47 @@ p {
 	display: inline;
 }
 
+ #buttons input[type="button"] {
+ 		width: 290px;
+ 		margin-bottom: 2px;
+ }
+
+ #interface {
+ 	/*padding-top: 10%;*/
+ 	position: absolute;
+ 	width: 80%;
+ 	right: 0%;
+ 	bottom: 10%;
+
+ }
+
+ #buttons {
+ 	top: 0;
+ 	position: absolute;
+ 	/*display: inline-block;*/
+ 	clear: left;
+ 	left: 43%;
+	}
+
+#terminal {
+	width: 40%;
+	height: 300px;
+	border: 2px solid yellow;
+	border-radius: 10px;
+ 	display: inline-block;
+	clear: left;
+	overflow: auto;
+	color: yellow;
+	font-family: Courier New;
+	font-size: 20;
+	text-align: left;
+/*	position: relative;*/	
+}
+
+::-webkit-scrollbar { 
+    display: none;
+}
+
 
 </style>
 </head>
@@ -124,6 +165,8 @@ p {
 		<input type="button" value="PLAY!" onclick="submitData()">
 	</form>
 </div>
+
+
 
 <table class="grid" style="display:none">
 <tr>
@@ -140,26 +183,82 @@ p {
 </table>
 
 
+<div id="interface">
+	<div id="terminal"  style="display:none">
+	</div>
+
+
+	<div id="buttons" style="display:none">
+		<input type="button" value="Dropshot!" onclick="postShot('dropshot')"><br>
+		<input type="button" value="Backhand" onclick="postShot('backhand')"><br>
+		<input type="button" value="Forehand" onclick="postShot('forehand')"><br>
+	</div>
+</div>
+
+<script type="text/javascript">
+	function postShot(hit) {
+		window.hit = hit;
+		$.post("/game/" + hit, 
+			getResult());
+
+		var objDiv = document.getElementById("terminal");
+		objDiv.scrollTop = objDiv.scrollHeight;
+		
+	}
+
+
+	function getResult() {
+		$.get("/game", function(response) {
+			if (response == 'Human') {
+				u1();
+	 	    } else if (response == 'Computer') {
+				u2();
+			};
+			updateTerminal(response);
+		})
+	}
+
+	function updateTerminal(response) {
+			players = {'Computer':'Human', 'Human':'Computer'};
+
+			if (response == 'Draw'){
+				$('#terminal').append('<p> Draw </p><br><br>');
+			} else {
+				$.get("/computer_pick", function(computerPick) {
+					// $('#terminal').append('<p> $ Human does a ' + window.hit + " and computer has responded with a " + computerPick + '. ' + response + ' defeats the ' + players[response] + '!!!!' +'</p><br><br>' )})
+					$('#terminal').append('<p> $ Human does a ' + window.hit + "... <br>&nbsp;&nbsp;...Computer responds with a " + computerPick + '.<br>&nbsp;&nbsp;' + response + ' defeats the ' + players[response] + '!!!!' +'</p><br><br>' )})
+
+			}
+	}
+	</script>
+
+
+
+
 <script type="text/javascript">
 function submitData() {
 	var player1 = new Player(document.getElementsByName('player1')[0].value);
 	var player2 = new Player(document.getElementsByName('player2')[0].value);
 
-	if (document.getElementsByName('player1')[0].value.length == 0 || document.getElementsByName('player2')[0].value == 0){
-		return false;
-	}
+	// if (document.getElementsByName('player1')[0].value.length == 0 || document.getElementsByName('player2')[0].value == 0){
+	// 	return false;
+	// 	document.alert('sdf');
+	// }
 
 	var gender = $('input[name="gender"]:checked').val();
 	document.getElementsByClassName('grid')[0].style.display = "none";
-	document.getElementsByClassName('grid')[1].style.display = "inline";
+	document.getElementsByClassName('grid')[1].style.display = "block";
+	document.getElementById('buttons').style.display = "inline";
+	document.getElementById('terminal').style.display = "block";
 	$("#p1").html(player1.name);
 	$("#p2").html(player2.name)
 
 	game = new Game(player1, player2, gender);
 
-	var u1 = function() { updateScore(player1); }
-	var u2 = function() { updateScore(player2); }
+	u1 = function() { updateScore(player1); }
+	u2 = function() { updateScore(player2); }
 	
+	// comment out the next 4 lines, so that player can't physically increment his points
 	var p1 = document.getElementById('p1');
 	p1.addEventListener('click', u1);
 
